@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Validator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../src/regexUtils.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Form Validator</h1>
+    
+    <!-- Email Input -->
+    <div class="mb-6">
+      <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+      <input
+        type="email"
+        id="email"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+        placeholder="e.g., user@domain.com"
+      >
+      <p id="email-validity" class="mt-2 text-sm text-center font-medium"></p>
+    </div>
+
+    <!-- Phone Number Input -->
+    <div class="mb-6">
+      <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+      <input
+        type="tel"
+        id="phone"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+        placeholder="e.g., +12025550123 or +254712345678"
+      >
+      <ul id="phone-requirements" class="text-sm text-gray-600 space-y-2 mt-2"></ul>
+      <p id="phone-validity" class="mt-2 text-sm text-center font-medium"></p>
+      <p class="text-sm text-gray-600 mt-2">Formatted Phone Number: <span id="formatted-phone" class="font-medium text-gray-800"></span></p>
+    </div>
+
+    <!-- Password Input -->
+    <div class="mb-6">
+      <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+      <input
+        type="password"
+        id="password"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+        placeholder="Enter your password"
+      >
+      <div id="password-strength" class="mt-2 h-2 w-full bg-gray-200 rounded">
+        <div id="strength-bar" class="h-full rounded transition-all duration-300"></div>
+      </div>
+      <ul id="password-requirements" class="text-sm text-gray-600 space-y-2 mt-2"></ul>
+      <p id="password-validity" class="mt-2 text-sm text-center font-medium"></p>
+    </div>
+
+    <!-- Submit Button -->
+    <button id="submit-btn" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">Submit</button>
+    <p id="form-message" class="mt-4 text-sm text-center font-medium"></p>
+  </div>
+
+  <script>
+    const emailInput = document.getElementById('email');
+    const emailValidity = document.getElementById('email-validity');
+    const phoneInput = document.getElementById('phone');
+    const phoneRequirementsList = document.getElementById('phone-requirements');
+    const phoneValidity = document.getElementById('phone-validity');
+    const formattedPhone = document.getElementById('formatted-phone');
+    const passwordInput = document.getElementById('password');
+    const passwordRequirementsList = document.getElementById('password-requirements');
+    const passwordValidity = document.getElementById('password-validity');
+    const strengthBar = document.getElementById('strength-bar');
+    const submitBtn = document.getElementById('submit-btn');
+    const formMessage = document.getElementById('form-message');
+
+    // Email validation
+    emailInput.addEventListener('input', () => {
+      const email = emailInput.value;
+      const isValid = regexUtils.validateEmail(email);
+      emailValidity.textContent = isValid
+        ? 'Email is valid! 🎉'
+        : email ? 'Invalid email format.' : 'Please enter an email.';
+      emailValidity.className = `mt-2 text-sm text-center font-medium ${isValid ? 'text-green-600' : 'text-red-600'}`;
+      emailInput.className = `mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${isValid ? 'border-green-500' : email ? 'border-red-500' : 'border-gray-300'}`;
+    });
+
+    // Phone number validation
+    phoneInput.addEventListener('input', () => {
+      const phone = phoneInput.value;
+      const result = regexUtils.validateInternationalPhoneNumber(phone);
+      const formatted = regexUtils.formatPhoneNumber(phone);
+
+      phoneRequirementsList.innerHTML = result.requirements.map(req => `
+        <li class="flex items-center">
+          <span class="mr-2">${req.met ? '✅' : '❌'}</span>
+          ${req.message}
+        </li>
+      `).join('');
+
+      phoneValidity.textContent = result.isValid
+        ? 'Phone number is valid! 🎉'
+        : phone ? 'Phone number does not meet all requirements.' : 'Please enter a phone number.';
+      phoneValidity.className = `mt-2 text-sm text-center font-medium ${result.isValid ? 'text-green-600' : 'text-red-600'}`;
+      phoneInput.className = `mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${result.isValid ? 'border-green-500' : phone ? 'border-red-500' : 'border-gray-300'}`;
+
+      formattedPhone.textContent = formatted || 'No valid phone number entered.';
+    });
+
+    // Password validation with strength meter
+    passwordInput.addEventListener('input', () => {
+      const password = passwordInput.value;
+      const result = regexUtils.checkPasswordStrength(password);
+
+      passwordRequirementsList.innerHTML = result.requirements.map(req => `
+        <li class="flex items-center">
+          <span class="mr-2">${req.met ? '✅' : '❌'}</span>
+          ${req.message}
+        </li>
+      `).join('');
+
+      passwordValidity.textContent = result.isValid
+        ? 'Password is valid! 🎉'
+        : password ? 'Password does not meet all requirements.' : 'Please enter a password.';
+      passwordValidity.className = `mt-2 text-sm text-center font-medium ${result.isValid ? 'text-green-600' : 'text-red-600'}`;
+      passwordInput.className = `mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${result.isValid ? 'border-green-500' : password ? 'border-red-500' : 'border-gray-300'}`;
+
+      // Strength meter
+      const strength = result.requirements.filter(req => req.met).length;
+      const strengthPercentage = (strength / result.requirements.length) * 100;
+      strengthBar.style.width = `${strengthPercentage}%`;
+      strengthBar.className = `h-full rounded transition-all duration-300 ${
+        strength <= 2 ? 'bg-red-500' : strength <= 4 ? 'bg-yellow-500' : 'bg-green-500'
+      }`;
+    });
+
+    // Form submission
+    submitBtn.addEventListener('click', () => {
+      const email = emailInput.value;
+      const phone = phoneInput.value;
+      const password = passwordInput.value;
+
+      const isEmailValid = regexUtils.validateEmail(email);
+      const phoneResult = regexUtils.validateInternationalPhoneNumber(phone);
+      const passwordResult = regexUtils.checkPasswordStrength(password);
+
+      if (isEmailValid && phoneResult.isValid && passwordResult.isValid) {
+        formMessage.textContent = 'Form submitted successfully! 🎉';
+        formMessage.className = 'mt-4 text-sm text-center font-medium text-green-600';
+      } else {
+        formMessage.textContent = 'Please correct the errors in the form.';
+        formMessage.className = 'mt-4 text-sm text-center font-medium text-red-600';
+      }
+    });
+  </script>
+</body>
+</html>

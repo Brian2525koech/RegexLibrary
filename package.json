@@ -3,10 +3,10 @@
   "name": "regex-utils",
   "version": "1.0.0",
   "description": "A professional JavaScript library for regex-based validation, formatting, and text processing.",
-  "main": "regexUtils.js",
+  "main": "dist/regexUtils.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-modules regexUtils.js",
+    "test": "node --experimental-modules src/regexUtils.js",
     "build": "tsc"
   },
   "keywords": ["regex", "validation", "phone", "password", "email", "text"],
@@ -14,9 +14,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/regex-utils.git"
+    "url": "https://github.com/Brian2525koech/RegexLibrary.git"
   },
   "devDependencies": {
     "typescript": "^5.5.4"
-  }
+  },
+  "files": [
+    "dist",
+    "src",
+    "demo",
+    "README.md",
+    "LICENSE"
+  ]
 }

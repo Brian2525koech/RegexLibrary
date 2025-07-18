@@ -279,13 +279,13 @@ function cleanString(text, { case: caseOption = 'none', removeSpecial = false } 
 }
 
 /**
- * Tokenizes and parses text into words, numbers, and punctuation.
+ * Tokenizes and parses text into words, numbers, punctuation, hashtags, mentions, and URLs.
  * @param {string} text - The text to tokenize.
- * @returns {{ words: string[], numbers: string[], punctuation: string[] }} Object with arrays of words, numbers, and punctuation.
+ * @returns {{ words: string[], numbers: string[], punctuation: string[], hashtags: string[], mentions: string[], urls: string[] }} Object with arrays of words, numbers, punctuation, hashtags, mentions, and URLs.
  */
 function tokenizeText(text) {
   if (typeof text !== 'string' || text.length === 0) {
-    return { words: [], numbers: [], punctuation: [] };
+    return { words: [], numbers: [], punctuation: [], hashtags: [], mentions: [], urls: [] };
   }
 
   // Words: Sequences of letters (Unicode-aware)
@@ -294,100 +294,104 @@ function tokenizeText(text) {
   const numberRegex = /\d+(?:\.\d+)?/g;
   // Punctuation: Non-letter, non-digit, non-whitespace characters
   const punctuationRegex = /[^\p{L}\p{Number}\s]/gu;
+  // Hashtags, mentions, URLs (consistent with extractSocialMediaEntities)
+  const hashtagRegex = /#[\p{L}\d_]+/gu;
+  const mentionRegex = /@[\p{L}\d_]+/gu;
+  const urlRegex = /(?:https?:\/\/|www\.)[\p{L}\d\-._~:/?#[\]@!$&'()*+,;=]+/gu;
 
   return {
     words: text.match(wordRegex) || [],
     numbers: text.match(numberRegex) || [],
-    punctuation: text.match(punctuationRegex) || []
+    punctuation: text.match(punctuationRegex) || [],
+    hashtags: text.match(hashtagRegex) || [],
+    mentions: text.match(mentionRegex) || [],
+    urls: text.match(urlRegex) || []
   };
 }
 
 // Export for Node.js or browser
+const regexUtils = {
+  validateEmail,
+  validateInternationalPhoneNumber,
+  formatPhoneNumber,
+  checkPasswordComplexity,
+  checkPasswordStrength,
+  extractSocialMediaEntities,
+  cleanString,
+  tokenizeText
+};
+
+// Node.js export
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    validateEmail,
-    validateInternationalPhoneNumber,
-    formatPhoneNumber,
-    checkPasswordComplexity,
-    checkPasswordStrength,
-    extractSocialMediaEntities,
-    cleanString,
-    tokenizeText
-  };
-} else {
-  window.regexUtils = {
-    validateEmail,
-    validateInternationalPhoneNumber,
-    formatPhoneNumber,
-    checkPasswordComplexity,
-    checkPasswordStrength,
-    extractSocialMediaEntities,
-    cleanString,
-    tokenizeText
-  };
+  module.exports = regexUtils;
 }
 
-// Test cases (run in Node.js or browser console)
-if (typeof window === 'undefined') {
+// Browser export
+if (typeof window !== 'undefined') {
+  window.regexUtils = regexUtils;
+}
+
+// Test cases (run in Node.js only)
+if (typeof module !== 'undefined' && module.exports) {
   console.log('Running test cases...');
   
   // Test validateEmail
   console.log('Email Tests:');
-  console.log(validateEmail('user@domain.com')); // true
-  console.log(validateEmail('invalid@domain')); // false
-  console.log(validateEmail('user.name@sub.domain.com')); // true
-  console.log(validateEmail('')); // false
+  console.log(regexUtils.validateEmail('user@domain.com')); // true
+  console.log(regexUtils.validateEmail('invalid@domain')); // false
+  console.log(regexUtils.validateEmail('user.name@sub.domain.com')); // true
+  console.log(regexUtils.validateEmail('')); // false
 
   // Test validateInternationalPhoneNumber
   console.log('\nInternational Phone Number Tests:');
-  console.log(validateInternationalPhoneNumber('+12025550123')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+254712345678')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+447123456789')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+255701234567')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+919876543210')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+61412345678')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+2348031234567')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+5511987654321')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+4915112345678')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+819012345678')); // { isValid: true, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('123456')); // { isValid: false, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+12025550123x')); // { isValid: false, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+254123456789')); // { isValid: false, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+99912345678')); // { isValid: false, requirements: [...] }
-  console.log(validateInternationalPhoneNumber('+254612345678')); // { isValid: false, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+12025550123')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+254712345678')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+447123456789')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+255701234567')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+919876543210')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+61412345678')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+2348031234567')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+5511987654321')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+4915112345678')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+819012345678')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('123456')); // { isValid: false, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+12025550123x')); // { isValid: false, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+254123456789')); // { isValid: false, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+99912345678')); // { isValid: false, requirements: [...] }
+  console.log(regexUtils.validateInternationalPhoneNumber('+254612345678')); // { isValid: false, requirements: [...] }
 
   // Test formatPhoneNumber
   console.log('\nPhone Number Format Tests:');
-  console.log(formatPhoneNumber('+1 (202) 555-0123')); // "+12025550123"
-  console.log(formatPhoneNumber('00 254 712 345 678')); // "+254712345678"
-  console.log(formatPhoneNumber('123456')); // ""
-  console.log(formatPhoneNumber('+12025550123x')); // ""
+  console.log(regexUtils.formatPhoneNumber('+1 (202) 555-0123')); // "+12025550123"
+  console.log(regexUtils.formatPhoneNumber('00 254 712 345 678')); // "+254712345678"
+  console.log(regexUtils.formatPhoneNumber('123456')); // ""
+  console.log(regexUtils.formatPhoneNumber('+12025550123x')); // ""
 
   // Test checkPasswordComplexity
   console.log('\nPassword Complexity Tests:');
-  console.log(checkPasswordComplexity('Pass123!@#')); // true
-  console.log(checkPasswordComplexity('pass123!')); // false (no uppercase)
-  console.log(checkPasswordComplexity('Pass123')); // false (too short)
-  console.log(checkPasswordComplexity(' Pass123!@#')); // false (leading space)
+  console.log(regexUtils.checkPasswordComplexity('Pass123!@#')); // true
+  console.log(regexUtils.checkPasswordComplexity('pass123!')); // false (no uppercase)
+  console.log(regexUtils.checkPasswordComplexity('Pass123')); // false (too short)
+  console.log(regexUtils.checkPasswordComplexity(' Pass123!@#')); // false (leading space)
 
   // Test checkPasswordStrength
   console.log('\nPassword Strength Tests:');
-  console.log(checkPasswordStrength('Pass123!@#')); // { isValid: true, requirements: [...] }
-  console.log(checkPasswordStrength('pass123!')); // { isValid: false, requirements: [...] }
+  console.log(regexUtils.checkPasswordStrength('Pass123!@#')); // { isValid: true, requirements: [...] }
+  console.log(regexUtils.checkPasswordStrength('pass123!')); // { isValid: false, requirements: [...] }
 
   // Test extractSocialMediaEntities
   console.log('\nSocial Media Entities Tests:');
-  console.log(extractSocialMediaEntities('Hello @user #coding https://example.com'));
+  console.log(regexUtils.extractSocialMediaEntities('Hello @user #coding https://example.com'));
   // Output: { hashtags: ["#coding"], mentions: ["@user"], urls: ["https://example.com"] }
 
   // Test cleanString
   console.log('\nClean String Tests:');
-  console.log(cleanString('  Hello   World!  ', { case: 'title' })); // "Hello World!"
-  console.log(cleanString('Hello!!  World!!!', { case: 'lower', removeSpecial: true })); // "hello world"
-  console.log(cleanString('  TEST   CASE  ', { case: 'upper' })); // "TEST CASE"
+  console.log(regexUtils.cleanString('  Hello   World!  ', { case: 'title' })); // "Hello World!"
+  console.log(regexUtils.cleanString('Hello!!  World!!!', { case: 'lower', removeSpecial: true })); // "hello world"
+  console.log(regexUtils.cleanString('  TEST   CASE  ', { case: 'upper' })); // "TEST CASE"
 
   // Test tokenizeText
   console.log('\nTokenize Text Tests:');
-  console.log(tokenizeText('Hello, world! 123.45 and café...'));
-  // Output: { words: ["Hello", "world", "café"], numbers: ["123.45"], punctuation: [",", "!", "..."] }
+  console.log(regexUtils.tokenizeText('Hello, world! 123.45 and @user #coding https://example.com'));
+  // Output: { words: ["Hello", "world"], numbers: ["123.45"], punctuation: [",", "!"], hashtags: ["#coding"], mentions: ["@user"], urls: ["https://example.com"] }
 }
