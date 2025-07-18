@@ -1,0 +1,22 @@
+
+{
+  "name": "regex-utils",
+  "version": "1.0.0",
+  "description": "A professional JavaScript library for regex-based validation, formatting, and text processing.",
+  "main": "regexUtils.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-modules regexUtils.js",
+    "build": "tsc"
+  },
+  "keywords": ["regex", "validation", "phone", "password", "email", "text"],
+  "author": "Brian Koech",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/regex-utils.git"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
